@@ -1,0 +1,7 @@
+#!/bin/sh
+
+BASE=https://raw.githubusercontent.com/Gnurou/tagainijisho/master/src/core/jmdict/jlpt-n
+
+for level in {1..5}; do
+	wget "${BASE}${level}.csv" -O "data/JLPT_N${level}.csv"
+done
