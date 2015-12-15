@@ -107,7 +107,7 @@ cp $TMPFILE data/anki.csv
 # Extract by JLPT level
 for level in {1..5}; do
 	echo "Extracting JLPT N${level}"
-	for entry in $(grep "^[0-9][0-9][0-9][0-9][0-9][0-9][0-9]" data/JLPT_N${level}.csv); do
+	for entry in $(grep "^[0-9][0-9][0-9][0-9][0-9][0-9][0-9]" data/JLPT_N${level}_vocab.csv); do
 		grep "^${entry}|" $TMPFILE >> data/anki${level}.csv
 	done
 done
