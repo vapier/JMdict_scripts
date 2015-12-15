@@ -75,7 +75,7 @@ replace "<\/reb>[ ]*<sense>" "|"
 echo "Processing sense data"
 
 # Sense
-delete "<ant>[^<]*<\/ant>"
+delete_elem "ant"
 delete "<lsource [^>]*>[^<]*<\/lsource>"
 delete "<lsource [^>]*\/>"
 
