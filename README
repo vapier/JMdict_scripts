@@ -1,1 +1,23 @@
-A few scripts to automatically generate Anki flashcards from JMdict.
+Scripts to automatically generate Anki flashcards from JMdict. Execute run_all
+and the resulting files will be in the 'data/' subdirectory:
+ - JMdict.xml: the full JMdict directory
+ - JLPT_N1.csv to JLPT_N5.csv: unofficial lists of JLPT vocabulary (from
+   tagainijisho)
+ - anki.csv: full JMdict data converted to Anki flashcards.
+ - anki1.csv to anki5.csv: flashcards by JLPT level.
+
+Requirements:
+ - rsync
+ - wget
+ - sed
+ - tr
+
+This code is copyright Denis Dupeyron 2015 and provided under the GNU General
+Public License version 3.
+
+The JMdict data is copyright, and distributed in accordance with the
+Licence Statement, which can found at the WWW site of the Electronic Dictionary
+Research and Development Group.
+
+The JLPT data is copyright 2008-2013 Alexandre Courbot and covered by the GNU
+General Public License version 3 or later.
