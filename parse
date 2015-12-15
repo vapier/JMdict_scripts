@@ -1,0 +1,108 @@
+#!/bin/sh
+
+mkdir -p data
+
+# If we're lucky /tmp is in tmpfs and thus faster
+TMPFILE=$(mktemp)
+
+delete() {
+	sed "s/[ ]*${1}[ ]*//g" -i $TMPFILE
+}
+
+delete_elem() {
+	delete "<${1}>[^<]*<\/${1}>"
+}
+
+replace() {
+	sed "s/[ ]*${1}[ ]*/${2}/g" -i $TMPFILE
+}
+
+# Delete header, then put everything into a single line and copy to working file
+sed '/<?xml version=/,/<JMdict>/d' data/JMdict.xml | tr "\n" " " > $TMPFILE
+
+# Split file one entry per line, mostly (header is still on the first line)
+replace "<\/entry>" "\n"
+
+# Delete last line
+sed '$ d' -i $TMPFILE
+
+# Remove non-english glosses
+delete "<gloss xml:lang=\"[a-z]*\">[^<]*<\/gloss>"
+
+# Format entry number
+replace "<entry>[ ]*<ent_seq>\([^<]*\)<\/ent_seq>" "\1|"
+
+# Unused elements
+delete_elem "ke_pri"
+delete_elem "re_pri"
+delete_elem "xref"
+
+# Kanji
+# Move ke_inf inside keb
+replace "<\/keb>[ ]*<ke_inf>&\([^;]*\);<\/ke_inf>" " <i>\1<\/i><\/keb>"
+replace "<\/keb>[ ]*<ke_inf>&\([^;]*\);<\/ke_inf>" " <i>\1<\/i><\/keb>"
+# Delete <k_ele> and </k_ele>
+delete "<k_ele>"
+delete "<\/k_ele>"
+# Merge kebs
+replace "<\/keb>[ ]*<keb>" "\\\n"
+# Delete remaining <keb> and </keb>
+delete "<keb>"
+delete "<\/keb>"
+
+# Reading
+# FIXME: deal with these in a better way
+delete_elem "re_restr"
+delete "<re_nokanji\/>"
+# Move re_inf inside reb
+replace "<\/reb>[ ]*<re_inf>&\([^;]*\);<\/re_inf>" " <i>\1<\/i><\/reb>"
+replace "<\/reb>[ ]*<re_inf>&\([^;]*\);<\/re_inf>" " <i>\1<\/i><\/reb>"
+# Delete <r_ele> and </r_ele>
+delete "<r_ele>"
+delete "<\/r_ele>"
+# Merge rebs
+replace "<\/reb>[ ]*<reb>" "\\\n"
+# Delete remaining <reb> and </reb>, add separator
+replace "<reb>" "|"
+replace "<\/reb>[ ]*<sense>" "|"
+
+# Sense
+delete "<ant>[^<]*<\/ant>"
+delete "<lsource [^>]*>[^<]*<\/lsource>"
+delete "<lsource [^>]*\/>"
+
+replace "<\/stag[kr]>[ ]*<stag[kr]>" ", "
+replace "<\/stag[kr]>" ": "
+delete "<stag[kr]>"
+
+replace "<pos>&\([^;]*\);<\/pos>" "<i>\1<\/i> "
+replace "<misc>&\([^;]*\);<\/misc>" "<i>\1<\/i> "
+replace "<dial>&\([^;]*\);<\/dial>" "<i>\1<\/i> "
+replace "<field>&\([^;]*\);<\/field>" "<i>\1<\/i> "
+
+replace "<\/gloss>[ ]*<gloss>" "; "
+replace "<\/i>[ ]*<gloss>" "<\/i>\\\n"
+replace "<\/i><i>" "<\/i> <i>"
+replace "<\/gloss>[ ]*<\/sense>[ ]*<sense>" ".\\\n"
+replace "<s_inf>" " ["
+replace "<\/s_inf>" "]"
+replace "<\/gloss>[ ]*<\/sense>" "."
+delete "<gloss>"
+
+replace "\]\([^ ]\)" "\] \1"
+replace ",\([^ ]\)" ", \1"
+replace ":\([^ ]\)" ": \1"
+#replace "<\/i>\([^ ]\)" "<\/i> \1"
+
+rm data/anki*.csv
+cp $TMPFILE data/anki.csv
+
+# Extract by JLPT level
+for level in {1..5}; do
+	for entry in $(grep "^[0-9][0-9][0-9][0-9][0-9][0-9][0-9]" data/JLPT_N${level}.csv); do
+		echo ${entry}
+		grep "^${entry}|" $TMPFILE >> data/anki${level}.csv
+	done
+done
+
+rm -f $TMPFILE
