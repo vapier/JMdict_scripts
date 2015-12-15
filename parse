@@ -101,7 +101,7 @@ replace "\]\([^ ]\)" "\] \1"
 replace ",\([^ ]\)" ", \1"
 replace ":\([^ ]\)" ": \1"
 
-rm-f data/anki_vocab*.csv
+rm -f data/anki_vocab*.csv
 cp $TMPFILE data/anki_vocab.csv
 
 # Extract by JLPT level
