@@ -17,6 +17,8 @@ replace() {
 	sed "s/[ ]*${1}[ ]*/${2}/g" -i $TMPFILE
 }
 
+echo "Preparing JMdict"
+
 # Delete header, then put everything into a single line and copy to working file
 sed '/<?xml version=/,/<JMdict>/d' data/JMdict.xml | tr "\n" " " > $TMPFILE
 
@@ -37,6 +39,8 @@ delete_elem "ke_pri"
 delete_elem "re_pri"
 delete_elem "xref"
 
+echo "Processing kanji data"
+
 # Kanji
 # Move ke_inf inside keb
 replace "<\/keb>[ ]*<ke_inf>&\([^;]*\);<\/ke_inf>" " <i>\1<\/i><\/keb>"
@@ -49,6 +53,8 @@ replace "<\/keb>[ ]*<keb>" "\\\n"
 # Delete remaining <keb> and </keb>
 delete "<keb>"
 delete "<\/keb>"
+
+echo "Processing reading data"
 
 # Reading
 # FIXME: deal with these in a better way
@@ -65,6 +71,8 @@ replace "<\/reb>[ ]*<reb>" "\\\n"
 # Delete remaining <reb> and </reb>, add separator
 replace "<reb>" "|"
 replace "<\/reb>[ ]*<sense>" "|"
+
+echo "Processing sense data"
 
 # Sense
 delete "<ant>[^<]*<\/ant>"
@@ -92,15 +100,14 @@ delete "<gloss>"
 replace "\]\([^ ]\)" "\] \1"
 replace ",\([^ ]\)" ", \1"
 replace ":\([^ ]\)" ": \1"
-#replace "<\/i>\([^ ]\)" "<\/i> \1"
 
 rm data/anki*.csv
 cp $TMPFILE data/anki.csv
 
 # Extract by JLPT level
 for level in {1..5}; do
+	echo "Extracting JLPT N${level}"
 	for entry in $(grep "^[0-9][0-9][0-9][0-9][0-9][0-9][0-9]" data/JLPT_N${level}.csv); do
-		echo ${entry}
 		grep "^${entry}|" $TMPFILE >> data/anki${level}.csv
 	done
 done
