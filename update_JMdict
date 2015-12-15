@@ -1,2 +1,5 @@
 #!/bin/sh
+
+mkdir -p data
+
 rsync -v -z --progress ftp.monash.edu.au::nihongo/JMdict data/JMdict.xml
