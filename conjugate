@@ -1,0 +1,21 @@
+#!/bin/sh
+
+mkdir -p data
+
+# If we're lucky /tmp is in tmpfs and thus faster
+TMPFILE=$(mktemp)
+
+IFS=$'\n'
+
+for line in $(grep "<i>v5b<\/i>" ${1}); do
+	id=$(echo ${line} | cut -d '|' -f 1)
+	kanji_list=$(echo ${line} | cut -d '|' -f 2 | sed 's/[ ]*<i>.*<\/i>[ ]*//g')
+	reading_list=$(echo ${line} | cut -d '|' -f 3 | sed 's/[ ]*<i>.*<\/i>[ ]*//g')
+	sense=$(echo ${line} | cut -d '|' -f 4)
+	for suffix in びます びません びました びませんでした ぶ ばない んだ ばなかった んで びたい; do
+		echo -n ${kanji_list} | sed "s/ぶ\\\n/${suffix}\\\n/g" | sed "s/ぶ$/${suffix}/"
+		echo -n "|"
+		echo -n ${reading_list} | sed "s/ぶ\\\n/${suffix}\\\n/g" | sed "s/ぶ$/${suffix}/"
+		echo
+	done
+done
