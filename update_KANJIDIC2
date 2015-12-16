@@ -1,0 +1,6 @@
+#!/bin/sh
+
+mkdir -p data
+cd data
+wget --show-progress http://www.edrdg.org/kanjidic/kanjidic2.xml.gz
+gunzip kanjidic2.xml.gz
