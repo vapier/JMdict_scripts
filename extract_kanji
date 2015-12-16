@@ -50,10 +50,6 @@ replace "<kun>\([^<]*\)<\/kun>[ ]*<on>\([^<]*\)<\/on>" "<on>\2<\/on><kun>\1<\/ku
 
 replace "<\/on>[ ]*<kun>" "|"
 
-cp $TMPFILE data/anki_kanji.csv
-rm -f $TMPFILE
-exit
-
 replace "<rmgroup>[ ]*<kun>" "||"
 replace "<rmgroup>[ ]*<on>" "|"
 replace "<\/on>[ ]*<meaning>" "||"
@@ -63,5 +59,15 @@ replace "<rmgroup>[ ]*<meaning>" "|||"
 replace "<\/meaning>[ ]*<meaning>" "; "
 delete "<\/meaning>[ ]*<\/rmgroup>[ ]*<\/reading_meaning>"
 
+# Sometimes there's no meaning information
+replace "<\/kun>[ ]*<\/rmgroup>[ ]*<\/reading_meaning>" "|"
+replace "<\/on>[ ]*<\/rmgroup>[ ]*<\/reading_meaning>" "||"
+
+# Sometimes there's nothing at all
+replace "<rmgroup>[ ]*<\/rmgroup>[ ]*<\/reading_meaning>" "|||"
+replace "<\/literal>.*<\/misc>" "|||"
+delete "<dic_number>.*<\/dic_number>"
+
 cp $TMPFILE data/anki_kanji.csv
 rm -f $TMPFILE
+
