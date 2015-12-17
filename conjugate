@@ -1,21 +1,42 @@
 #!/bin/sh
 
 mkdir -p data
+input_file="${1}"
 
 # If we're lucky /tmp is in tmpfs and thus faster
 TMPFILE=$(mktemp)
 
 IFS=$'\n'
 
-for line in $(grep "<i>v5b<\/i>" ${1}); do
+tense() {
+	index=$((index + 1))
 	id=$(echo ${line} | cut -d '|' -f 1)
 	kanji_list=$(echo ${line} | cut -d '|' -f 2 | sed 's/[ ]*<i>.*<\/i>[ ]*//g')
 	reading_list=$(echo ${line} | cut -d '|' -f 3 | sed 's/[ ]*<i>.*<\/i>[ ]*//g')
 	sense=$(echo ${line} | cut -d '|' -f 4)
-	for suffix in びます びません びました びませんでした ぶ ばない んだ ばなかった んで びたい; do
-		echo -n ${kanji_list} | sed "s/ぶ\\\n/${suffix}\\\n/g" | sed "s/ぶ$/${suffix}/"
-		echo -n "|"
-		echo -n ${reading_list} | sed "s/ぶ\\\n/${suffix}\\\n/g" | sed "s/ぶ$/${suffix}/"
-		echo
+	echo -n "${id}.$(printf '%02d\n' ${index})|"
+	echo -n ${kanji_list} | sed "s/${root}\\\n/${1}\\\n/g" | sed "s/${root}$/${1}/"
+	echo -n "|"
+	echo -n ${reading_list} | sed "s/${root}\\\n/${1}\\\n/g" | sed "s/${root}$/${1}/"
+	echo "|${2}\n${sense}"
+}
+
+conj() {
+	root=${2}
+	for line in $(grep "<i>${1}<\/i>" "${input_file}"); do
+		index="0"
+		tense ${3} "long present aff"
+		tense ${4} "long present neg"
+		tense ${5} "long past aff"
+		tense ${6} "long past neg"
+		tense ${7} "short present aff"
+		tense ${8} "short pres neg"
+		tense ${9} "short past aff"
+		tense ${10} "short past neg"
+		tense ${11} "te-form"
+		tense ${12} "tai-form"
 	done
-done
+}
+
+conj v5b ぶ びます びません びました びませんでした ぶ ばない んだ ばなかった んで びたい
+conj v5g ぐ ぎます ぎません ぎました ぎませんでした ぐ がない いだ がなかった いで ぎたい
