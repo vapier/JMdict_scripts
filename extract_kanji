@@ -68,6 +68,13 @@ replace "<rmgroup>[ ]*<\/rmgroup>[ ]*<\/reading_meaning>" "|||"
 replace "<\/literal>.*<\/misc>" "|||"
 delete "<dic_number>.*<\/dic_number>"
 
+for level in {1..5}; do
+	echo "Extracting JLPT N${level}"
+	for entry in $(cat data/JLPT_kanji_N${level}.csv); do
+		grep "^${entry}|" $TMPFILE >> data/anki_kanji_JLPT_N${level}.csv
+	done
+done
+
 cp $TMPFILE data/anki_kanji.csv
 rm -f $TMPFILE
 
