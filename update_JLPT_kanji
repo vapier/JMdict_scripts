@@ -1,0 +1,9 @@
+#!/bin/sh
+
+mkdir -p data
+
+BASE=https://github.com/Gnurou/tagainijisho/blob/master/src/core/kanjidic2/jlpt-n
+
+for level in {1..5}; do
+	wget --show-progress "${BASE}${level}.csv" -O "data/JLPT_kanji_N${level}.csv"
+done
