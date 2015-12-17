@@ -18,7 +18,7 @@ tense() {
 	echo -n ${kanji_list} | sed "s/${root}\\\n/${1}\\\n/g" | sed "s/${root}$/${1}/"
 	echo -n "|"
 	echo -n ${reading_list} | sed "s/${root}\\\n/${1}\\\n/g" | sed "s/${root}$/${1}/"
-	echo "|${2}\n${sense}"
+	echo "|${2}\n$(echo ${line} | cut -d '|' -f 2)\n$(echo ${line} | cut -d '|' -f 3)\n${sense}"
 }
 
 conj() {
