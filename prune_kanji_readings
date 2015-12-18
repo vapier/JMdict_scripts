@@ -2,13 +2,20 @@
 
 IFS=$'\n'
 
+katakana_to_hiragana() {
+	local kana_dict="ァぁアあィぃイいゥぅウうェぇエえォぉオおカかガがキきギぎクくグぐケけゲげコこゴごサさザざシしジじスすズずセせゼぜソそゾぞタたダだチちヂぢッっツつヅづテてデでトとドどナなニにヌぬネねノのハはバばパぱヒひビびピぴフふブぶプぷヘへベべペぺホほボぼポぽマまミみムむメめモもャゃヤやュゅユゆョょヨよラらリりルるレれロろヮゎワわヰゐヱゑヲをンんヴゔ"
+	for char in $(echo ${1} | sed -e 's/\(.\)/\1\n/g'); do
+		echo -n ${kana_dict} | sed "s/.*${char}\(.\).*/\1/"
+	done
+}
+
 for line in in $(cat data/anki_kanji_JLPT_N${1}.csv); do
 	kanji=$(echo ${line} | cut -d '|' -f 1)
 	on_list=$(echo ${line} | cut -d '|' -f 2)
 	kun_list=$(echo ${line} | cut -d '|' -f 3)
 	echo
 	echo ${line}
-	echo ${on_list}
+	for on_yomi in $(echo ${on_list} | sed 's/, /\n/g'); do echo $on_yomi; done
 	echo ${kun_list}
 	grep ${kanji} data/anki_vocab_JLPT_N${1}.csv
 done
