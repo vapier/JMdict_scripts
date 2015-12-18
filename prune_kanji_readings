@@ -1,0 +1,14 @@
+#!/bin/sh
+
+IFS=$'\n'
+
+for line in in $(cat data/anki_kanji_JLPT_N${1}.csv); do
+	kanji=$(echo ${line} | cut -d '|' -f 1)
+	on_list=$(echo ${line} | cut -d '|' -f 2)
+	kun_list=$(echo ${line} | cut -d '|' -f 3)
+	echo
+	echo ${line}
+	echo ${on_list}
+	echo ${kun_list}
+	grep ${kanji} data/anki_vocab_JLPT_N${1}.csv
+done
