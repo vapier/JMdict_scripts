@@ -1,5 +1,5 @@
 #!/bin/sh
 
 ./update_JMdict
-./update_JLPT
+./update_JLPT_vocab
 ./parse
