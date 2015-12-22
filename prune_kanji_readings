@@ -2,6 +2,8 @@
 
 IFS=$'\n'
 
+TMPFILE=$(mktemp)
+
 katakana_to_hiragana() {
 	local kana_dict="ァぁアあィぃイいゥぅウうェぇエえォぉオおカかガがキきギぎクくグぐケけゲげコこゴごサさザざシしジじスすズずセせゼぜソそゾぞタたダだチちヂぢッっツつヅづテてデでトとドどナなニにヌぬネねノのハはバばパぱヒひビびピぴフふブぶプぷヘへベべペぺホほボぼポぽマまミみムむメめモもャゃヤやュゅユゆョょヨよラらリりルるレれロろヮゎワわヰゐヱゑヲをンんヴゔ"
 	for char in $(echo ${1} | sed -e 's/\(.\)/\1\n/g'); do
@@ -9,13 +11,49 @@ katakana_to_hiragana() {
 	done
 }
 
-for line in in $(cat data/anki_kanji_JLPT_N${1}.csv); do
+rm -f data/anki_kanji_JLPT_N${level}_filtered.csv
+rm -f data/anki_kanji_reading_JLPT_N${level}.csv
+
+echo "Pruning kanji readings in data/anki_vocab_JLPT_N${1}.csv"
+
+for level in $(seq 5 -1 ${1}); do
+	echo "Adding JLPT N${level} vocabulary"
+	cat data/anki_vocab_JLPT_N${level}.csv >> $TMPFILE
+done
+
+for line in $(cat data/anki_kanji_JLPT_N${1}.csv); do
 	kanji=$(echo ${line} | cut -d '|' -f 1)
 	on_list=$(echo ${line} | cut -d '|' -f 2)
 	kun_list=$(echo ${line} | cut -d '|' -f 3)
-	echo
-	echo ${line}
-	for on_yomi in $(echo ${on_list} | sed 's/, /\n/g'); do echo $on_yomi; done
-	echo ${kun_list}
-	grep ${kanji} data/anki_vocab_JLPT_N${1}.csv
+	meaning=$(echo ${line} | cut -d '|' -f 4)
+	grep ${kanji} ${TMPFILE} >> data/anki_kanji_reading_JLPT_N${level}.csv
+
+	new_on_list=""
+	while [[ "${on_list}" != "" ]]; do
+		on=$(echo ${on_list} | sed 's/^\([^,]*\).*/\1/')
+		on_list=$(echo ${on_list} | sed 's/^[^,]*//' | sed 's/^, //')
+		if [[ "$(grep ${kanji} ${TMPFILE} | cut -d '|' -f 3 | grep $(katakana_to_hiragana ${on}))" != "" ]]; then
+			if [[ "${new_on_list}" == "" ]]; then
+				new_on_list=${on}
+			else
+				new_on_list="${new_on_list}, ${on}"
+			fi
+		fi
+	done
+
+	new_kun_list=""
+	while [[ "${kun_list}" != "" ]]; do
+		kun=$(echo ${kun_list} | sed 's/^\([^,]*\).*/\1/')
+		kun_list=$(echo ${kun_list} | sed 's/^[^,]*//' | sed 's/^, //')
+		if [[ "$(grep ${kanji} ${TMPFILE} | cut -d '|' -f 3 | grep $(echo "${kun}" | sed 's/[.-]//g'))" != "" ]]; then
+			if [[ "${new_kun_list}" == "" ]]; then
+				new_kun_list=${kun}
+			else
+				new_kun_list="${new_kun_list}, ${kun}"
+			fi
+		fi
+	done
+	echo "${kanji}|${new_on_list}|${new_kun_list}|${meaning}" >> data/anki_kanji_JLPT_N${level}_filtered.csv
 done
+
+rm -f ${TMPFILE}
