@@ -15,8 +15,12 @@ replace() {
 	sed "s/[ ]*${1}[ ]*/${2}/g" -i $TMPFILE
 }
 
-rsync -v -z --progress ftp.monash.edu.au::nihongo/JMdict JMdict.xml
+rm -f JMdict_e.gz
+wget --show-progress ftp://ftp.monash.edu.au/pub/nihongo/JMdict_e.gz
+gzip -cdfv JMdict_e.gz > JMdict.xml
+rm -f JMdict_e.gz
 
+echo
 echo "Preparing JMdict"
 
 # Delete header, then put everything into a single line and copy to working file
