@@ -1,0 +1,74 @@
+#!/bin/sh
+
+# If we're lucky /tmp is in tmpfs and thus faster
+TMPFILE=$(mktemp)
+
+delete() {
+	sed "s/[ ]*${1}[ ]*//g" -i $TMPFILE
+}
+
+delete_elem() {
+	delete "<${1}>[^<]*<\/${1}>"
+}
+
+replace() {
+	sed "s/[ ]*${1}[ ]*/${2}/g" -i $TMPFILE
+}
+
+wget --show-progress http://www.edrdg.org/kanjidic/kanjidic2.xml.gz
+gunzip -f kanjidic2.xml.gz
+
+echo
+echo "Preparing KANJIDIC2"
+
+# Delete header, then put everything into a single line and copy to working file
+sed '/<?xml version=/,/<\/header>/d' kanjidic2.xml | tr "\n" " " > $TMPFILE
+
+# Split file one entry per line
+replace "<\/character>" "\n"
+
+# Delete last line
+sed '$ d' -i $TMPFILE
+
+delete "<\!-- Entry for Kanji: . --> <character> <literal>"
+
+# Delete meanings other than english
+delete "<meaning m_lang=[^<]*<\/meaning>"
+
+delete "<\/literal>.*<reading_meaning>"
+delete_elem "nanori"
+
+# Delete Korean readings
+delete "<reading r_type=\"pinyin[^<]*<\/reading>"
+delete "<reading r_type=\"korean[^<]*<\/reading>"
+
+replace "<reading r_type=\"ja_on\">\([^<]*\)<\/reading>" "<on>\1<\/on>"
+replace "<reading r_type=\"ja_kun\">\([^<]*\)<\/reading>" "<kun>\1<\/kun>"
+replace "<\/on>[ ]*<on>" ", "
+replace "<\/kun>[ ]*<kun>" ", "
+
+# Swap kun and on if kun comes first
+replace "<kun>\([^<]*\)<\/kun>[ ]*<on>\([^<]*\)<\/on>" "<on>\2<\/on><kun>\1<\/kun>"
+
+replace "<\/on>[ ]*<kun>" "|"
+
+replace "<rmgroup>[ ]*<kun>" "||"
+replace "<rmgroup>[ ]*<on>" "|"
+replace "<\/on>[ ]*<meaning>" "||"
+replace "<\/kun>[ ]*<meaning>" "|"
+replace "<rmgroup>[ ]*<meaning>" "|||"
+
+replace "<\/meaning>[ ]*<meaning>" "; "
+delete "<\/meaning>[ ]*<\/rmgroup>[ ]*<\/reading_meaning>"
+
+# Sometimes there's no meaning information
+replace "<\/kun>[ ]*<\/rmgroup>[ ]*<\/reading_meaning>" "|"
+replace "<\/on>[ ]*<\/rmgroup>[ ]*<\/reading_meaning>" "||"
+
+# Sometimes there's nothing at all
+replace "<rmgroup>[ ]*<\/rmgroup>[ ]*<\/reading_meaning>" "|||"
+replace "<\/literal>.*<\/misc>" "|||"
+delete "<dic_number>.*<\/dic_number>"
+
+cp $TMPFILE kanjidic2.csv
+rm -f $TMPFILE
