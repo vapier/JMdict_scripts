@@ -16,7 +16,7 @@ replace() {
 }
 
 wget --show-progress http://www.edrdg.org/kanjidic/kanjidic2.xml.gz
-gunzip -f kanjidic2.xml.gz
+gzip -dfv kanjidic2.xml.gz
 
 echo
 echo "Preparing KANJIDIC2"
