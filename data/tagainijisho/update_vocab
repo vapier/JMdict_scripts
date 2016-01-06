@@ -1,7 +1,5 @@
 #!/bin/sh
 
-mkdir -p data
-
 BASE=https://raw.githubusercontent.com/Gnurou/tagainijisho/master/src/core/jmdict/jlpt-n
 
 for level in {1..5}; do
