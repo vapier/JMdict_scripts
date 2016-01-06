@@ -5,3 +5,5 @@ BASE=https://raw.githubusercontent.com/Gnurou/tagainijisho/master/src/core/kanji
 for level in {1..5}; do
 	wget --show-progress "${BASE}${level}.csv" -O "kanji_N${level}.csv"
 done
+
+echo

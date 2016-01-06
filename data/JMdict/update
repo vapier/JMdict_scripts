@@ -106,5 +106,5 @@ replace ",\([^ ]\)" ", \1"
 replace ":\([^ ]\)" ": \1"
 
 cp $TMPFILE JMdict.csv
-
 rm -f $TMPFILE
+echo

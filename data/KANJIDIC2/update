@@ -72,3 +72,4 @@ delete "<dic_number>.*<\/dic_number>"
 
 cp $TMPFILE kanjidic2.csv
 rm -f $TMPFILE
+echo
