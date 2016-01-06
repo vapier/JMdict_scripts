@@ -5,5 +5,5 @@ mkdir -p data
 BASE=https://raw.githubusercontent.com/Gnurou/tagainijisho/master/src/core/jmdict/jlpt-n
 
 for level in {1..5}; do
-	wget --show-progress "${BASE}${level}.csv" -O "data/JLPT_N${level}_vocab.csv"
+	wget --show-progress "${BASE}${level}.csv" -O "vocab_N${level}.csv"
 done
