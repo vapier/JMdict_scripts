@@ -3,4 +3,4 @@ all:
 	./update_kanji
 
 clean:
-	$(RM) *.csv
+	$(RM) *.entries
