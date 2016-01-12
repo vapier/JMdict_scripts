@@ -1,4 +1,4 @@
-SUBDIRS = JMdict KANJIDIC2 tagainijisho
+SUBDIRS = KANJIDIC2 JMdict tagainijisho
 
 all:
 	$(foreach subdir, $(SUBDIRS), $(MAKE) -C $(subdir) all;)
