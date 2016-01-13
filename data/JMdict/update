@@ -111,8 +111,8 @@ IFS=$'\n'
 rm JMdict.csv
 for entry in $(cat $TMPFILE); do
 	echo -n ${entry} >> JMdict.csv
-	for char in $(echo ${entry} | cut -d '|' -f '2' | sed -e 's/\(.\)/\1\n/g' | awk '!seen[$0]++'); do
-		if [[ ${char} != "\\" ]]; then
+	for char in $(echo ${entry} | sed -e 's/\(.\)/\1\n/g' | awk '!seen[$0]++'); do
+		if [[ ${char} != "\\" ]] && [[ ${char} != "." ]] && [[ ${char} != "[" ]]; then
 			kanji_entry=$(grep "^${char}|" ../KANJIDIC2/kanjidic2.csv)
 			if [[ ${#kanji_entry} != "0" ]]; then
 				echo -n "\\n${kanji_entry}" | sed -e 's/|/ /g' -e 's/  / /g' >> JMdict.csv
